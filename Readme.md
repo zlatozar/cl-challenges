@@ -12,3 +12,7 @@
 5.	Exploit the powers of constraints - Natural and Artificial
 6.	Design for Error
 7.	When all else fails, standardize
+
+### Dependencies
+
+Project depends from Iterator and [study-paip](https://github.com/zlatozar/study-paip)

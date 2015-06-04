@@ -1,6 +1,6 @@
 ;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: ALGO; Base: 10 -*-
 
-(in-package #:algo)
+(in-package #:trees)
 
 ;; VMWare interview
 

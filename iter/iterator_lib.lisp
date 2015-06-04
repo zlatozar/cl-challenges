@@ -1,6 +1,6 @@
 ;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: ITER-LIB; Base: 10 -*-
 
-(in-package :iter-lib)
+(in-package :learn-iter)
 
 ;; Convert following code to use iterate library
 
@@ -155,8 +155,10 @@
    do (print (cons person tasted)))
 
 ;; Loop through hash table with 'being' 'the'
+
 ;; When using 'the' 'hash-keys' is plural
 (defparameter tv-shows (make-hash-table))
+
 (setf (gethash 'Breaking-Bad tv-shows) 10)
 (setf (gethash 'Shameless tv-shows) 10)
 (setf (gethash 'Arrow tv-shows) 5)
