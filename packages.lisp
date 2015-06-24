@@ -18,7 +18,8 @@
   (:documentation "Tree algorithms")
   (:use #:common-lisp
         #:iterate
-        #:paip))
+        #:paip)
+  (:export #:lca))
 
 ;;; ____________________________________
 ;;;                             Iterate
