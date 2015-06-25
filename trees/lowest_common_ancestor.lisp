@@ -166,12 +166,14 @@
 
 ;; INTRODUCE
 ;;
-;; Names for the searched leafs: 'p' and 'q'
+;; 1. Names for the searched leafs: 'p' and 'q'
+;; 2. Method signature: (defun lca (root p q) ...)
 ;;
 ;; Concentrate on (elm (left) (right)) and because this is the simplest case apply rule for the rest.
-;; Binary trees are recursive structure so recursion will pass perfectly. Of course be careful how to terminate.
+;; From my previous experience I know that binary trees are recursive structure so recursion
+;; will pass perfectly. Of course be careful how to terminate.
 
-;; Algorithm should be:
+;; Algorithm could be:
 ;; - find first in a left sub-tree
 ;; - find second in a right sub-tree
 ;; - compare to the searched 'p' and 'q'
@@ -184,8 +186,8 @@
 ;; Is it possible to use recursion to create context? A tree is a collection of smaller trees
 ;; up to a simple node. In the same way that a list is a collection of smaller list.
 
-;; We reduce 'elm'(it is tricky to choose proper name) so it is possible to be
-;; node, leaf or null. Wait a minute...
+;; We reduce 'elm'(it is tricky to choose proper name could be e.g. 'tree-branch-node-leaf-nil')
+;; so it is possible to be node, leaf or null. Wait a minute...
 ;;
 ;; AHA! I could build the recursive algorithm using possible 'elm' values:
 ;;                          (lca-rec nil 1 2)
@@ -214,7 +216,7 @@
              (when (and left right)     ; ***
                  (car elm))))))         ; ***
 
-;; Now I have a tree - the same solution recursively!
+;; Now I have a tree - the same solution recursively and reduce 'elm'
 
 (defun lca-rec (elm p q)
   (cond ((null elm) nil)
@@ -225,13 +227,19 @@
              (when (and left right)
                (car elm))))))
 
-;; What we have after recursion? Is it possible to discover nothing?
-;; NO! because with recursion we traverse the whole tree. But elements could be on different
-;; levels so I somehow to pass trough recursive calls what is found.
+
+;; What we have after recursion?
+;; After recursion we are finished with current 'segment' from the big picture.
+
+;; Is it possible to discover nothing?
+;; YES! Because with recursion we do not traverse the whole tree.
+
+;; But elements could be on different levels so I somehow to pass trough recursive calls what is found.
+;; That is OK, what I return from recursion is passed to the next recursive step.
 
 ;; AHA!
-;; Now the better question is when it fails? Only when one or none elements are found.
-;; Should I return if only one element is found? NO!
+;; Imagine big picture. Now the better question is when it fails? Only when one or none elements
+;; are found. Should I return if only one element is found? Yes!
 
 ;; REMEMBER. Look at the recursive procedure as simplest part of something big.
 ;; Recursive call is the glue to the big picture.
@@ -255,4 +263,4 @@
                  ;; return what is found until now and hope other will be found on next iteration
                  (or left right))))))        ;; ***
 
-;; What is after recursive call?
+;; Done!
