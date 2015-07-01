@@ -12,6 +12,7 @@
 
   :serial t
   :components ((:file "packages")
+               (:file "cl-aliases")
 
                (:file "algorithms/utopian_tree")
                (:file "trees/lowest_common_ancestor")
