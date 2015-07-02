@@ -47,3 +47,17 @@
 (defun range (max &key (min 0) (step 1))
   (loop for n from min below max by step
      collect n))
+
+(defmacro -> (value &body body)
+  `(progn
+     ,(reduce (lambda (inner outer)
+		(list* (car outer) inner (cdr outer)))
+	      body
+	      :initial-value value)))
+
+(defmacro ->> (value &body body)
+  `(progn
+     ,(reduce (lambda (inner outer)
+		(append outer (list inner)))
+	      body
+	      :initial-value value)))

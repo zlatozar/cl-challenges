@@ -11,14 +11,16 @@
 (defpackage #:algo
   (:documentation "Just algorithms")
   (:use #:common-lisp
-        #:iterate
-        #:paip))
+        #:iterate))
 
 (defpackage #:trees
   (:documentation "Tree algorithms")
   (:use #:common-lisp
-        #:iterate
-        #:paip)
+        #:iterate)
+
+  (:import-from :paip
+                #:find-anywhere)
+
   (:export #:lca))
 
 ;;; ____________________________________
