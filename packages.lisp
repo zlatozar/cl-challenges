@@ -11,12 +11,14 @@
 (defpackage #:algo
   (:documentation "Just algorithms")
   (:use #:common-lisp
-        #:iterate))
+        #:iterate
+        #:pcl-test))
 
 (defpackage #:trees
   (:documentation "Tree algorithms")
   (:use #:common-lisp
-        #:iterate)
+        #:iterate
+        #:pcl-test)
 
   (:import-from :paip
                 #:find-anywhere)
@@ -29,5 +31,4 @@
 (defpackage #:learn-iter
   (:documentation "Do not LOOP - Iterate")
   (:use #:common-lisp
-        #:iterate
-        #:paip))
+        #:iterate))

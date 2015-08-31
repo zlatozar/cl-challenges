@@ -12,6 +12,7 @@
 
   :serial t
   :components ((:file "packages")
+               (:file "tools/test")
                (:file "cl-aliases")
 
                (:file "algorithms/utopian_tree")
