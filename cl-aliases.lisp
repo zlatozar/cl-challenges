@@ -1,13 +1,15 @@
 ;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: CL-USER; Base: 10 -*-
 
-;;;; cl-alias.lisp: Inspired by Clojure and Scheme
+;;;; cl-aliases.lisp: Inspired by Clojure and Scheme
 
 (in-package #:cl-user)
 
 (defmacro alias (cl-name new-name)
   `(setf (symbol-function ,new-name) (symbol-function ,cl-name)))
 
-;; Predicates
+;;; ____________________________________________________________________________
+;;;                                                                  Predicates
+
 (alias 'null 'null?)
 
 (alias 'eq 'eq?)
@@ -27,10 +29,16 @@
 (alias 'numberp 'number?)
 (alias 'zerop 'zero?)
 
-;; Higher order functions
-(alias 'mapc 'for-each)
+(defun single? (lst)
+  (and (consp lst) (not (cdr lst))))
 
-;; Better names
+(defun gensym? (x)
+  "Is X a gensym'd (uninterned) symbol?"
+  (and (symbolp x) (not (symbol-package x))))
+
+;;; ____________________________________________________________________________
+;;;                                                                Better names
+
 (alias 'char 'char-at)
 (alias 'length 'string-length)
 
@@ -44,7 +52,11 @@
 (alias 'listen 'char-ready?)
 (alias 'ash 'arithmetic-shift)
 
-;; Not existing
+;;; ____________________________________________________________________________
+;;;                                                                   Sequences
+
+(alias 'mapc 'for-each)
+
 (defun range (max &key (min 0) (step 1))
   (loop for n from min below max by step
      collect n))
@@ -75,18 +87,12 @@
   (lambda (&rest args)
     (apply f (nreverse args))))
 
-(defun space-char? (c)
-  "Tests to see if character is whitespace"
-  (or (char= #\space c)
-      (char= #\tab c)
-      (char= #\newline c)
-      (char= #\return c)))
-
-(defun string->list (str)
-  (coerce str 'list))
-
-(defun list->string (list)
-  (coerce list 'string))
+(defun split-at (list k)
+  (declare (list list))
+  (loop for i below k
+     for (x . right) on list
+     collect x into left
+     finally (return (values left right))))
 
 (defmacro -> (x &rest forms)
   (flet ((expand-form (x form)
@@ -114,3 +120,44 @@
 ;;            (otherwise `(,(car form) ,x ,@(cdr form)))))
 ;;     (setf x y)
 ;;     (finally (return y))))
+
+;;; ____________________________________________________________________________
+;;;                                                                    Controls
+
+(defmacro nor (&rest forms)
+  "Equivalent to (not (or ...))."
+  (if (null forms) t
+      (if (null (rest forms))
+          `(not ,(first forms))
+          `(if ,(first forms)
+               nil
+               (nor ,@(rest forms))))))
+
+(defmacro nand (&rest forms)
+  "Equivalent to (not (and ...))."
+  (if (null forms) nil
+      (if (null (rest forms))
+          `(not ,(first forms))
+          `(if ,(first forms)
+               (nand ,@(rest forms))
+               t))))
+
+;;; ____________________________________________________________________________
+;;;                                                                     Strings
+
+(defun mkstr (&rest args)
+  (with-output-to-string (s)
+    (dolist (a args) (princ a s))))
+
+(defun space-char? (c)
+  "Tests to see if character is white space"
+  (or (char= #\space c)
+      (char= #\tab c)
+      (char= #\newline c)
+      (char= #\return c)))
+
+(defun string->list (str)
+  (coerce str 'list))
+
+(defun list->string (list)
+  (coerce list 'string))
