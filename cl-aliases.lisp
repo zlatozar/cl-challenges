@@ -48,7 +48,6 @@
 ;;;                                                                Better names
 
 (alias 'char 'char-at)
-(alias 'length 'string-length)
 
 ;; Weird names
 (alias 'princ 'display)
@@ -63,6 +62,7 @@
 ;;; ____________________________________________________________________________
 ;;;                                                                   Sequences
 
+(alias 'reduce 'accumulate)
 (alias 'mapc 'for-each)
 
 (defun range (max &key (min 0) (step 1))
@@ -75,6 +75,13 @@
           (,gstop ,stop))
          ((> ,var ,gstop))
        ,@body)))
+
+(defmacro repeat (number &body expressions)
+  `(let ((n ,number)
+         (thunk #'(lambda () ,@expressions)))
+     (loop (if (<= n 0) (RETURN))
+        (funcall thunk)
+        (setq n (- n 1)))))
 
 (defun foldl (function initval the-list)
   "Wrapper for (REDUCE <...> :INITIAL-VALUE <...> :FROM-END NIL) for
@@ -131,7 +138,7 @@
        then (expand-form y form)
        finally (return y))))
 
-;; Using `iterate' package. Nice naming convention.
+;; Using `iterate' package. Nice naming convention by the way.
 ;;
 ;; (defmacro -> (x &rest forms)
 ;;   (iter
@@ -160,8 +167,20 @@
 (defun zip (&rest lists)
   (apply #'mapcar #'list lists))
 
+(defun firstn (lst n)
+  (if (or (null lst) (<= n 0))
+      nil
+      (cons (car lst)
+            (firstn (cdr lst) (- n 1)))))
+
+(defun butlastn (seq n)
+  (subseq seq 0 (- (length seq) n)))
+
 ;;; ____________________________________________________________________________
 ;;;                                                                    Controls
+
+(defun ifnot (bad val)
+  (unless (eql bad val) val))
 
 (defmacro nor (&rest forms)
   "Equivalent to (not (or ...))."
@@ -220,6 +239,29 @@
 (defun list->string (list)
   (coerce list 'string))
 
+(defun join (delimiter strings)
+  (let ((template (format nil "~~{~~a~~^~a~~}" delimiter)))
+    (format nil template strings)))
+
+(defun list-join (delimiter list)
+  (loop for (element . more) on list
+     collect element
+     when more
+     collect delimiter))
+
+(defun splice (list &key (start 0) (end (length list)) new)
+  "Replace a sub-sequence of an array with some other sequence
+ not necessarily of the same length."
+  (setf list (cons nil list))
+  (let ((reroute-start (nthcdr start list)))
+    (setf (cdr reroute-start)
+          (nconc (make-list (length new))
+                 (nthcdr (- end start)
+                         (cdr reroute-start)))
+          list (cdr list)))
+  (replace list new :start1 start)
+  list)
+
 ;;; ____________________________________________________________________________
 ;;;                                                                   Utilities
 
@@ -234,33 +276,13 @@ expression to the variable at the same time"
              (funcall ,fn ,access-expr ,@args)))
        ,store-expr)))
 
-(defmacro defconst (name value &optional (documentation nil docp))
-  (let ((global (intern (format nil "%%~A" (symbol-name name)))))
-    `(progn
-       (defvar ,global ,value ,@(and docp `(,documentation)))
-       (define-symbol-macro ,name (load-time-value ,global t)))))
-
 (defun print-hash (hash-table)
   "Print the hash table as: Key, Value~% "
   (loop for k being the hash-keys in hash-table
      do (format t "~A, ~A~%" k (gethash k hash-table))))
 
-(defmacro deflex (var val &optional (doc nil docp))
-  "Define a top level (global) lexical VAR with initial value VAL, which is assigned
- unconditionally as with DEFPARAMETER.  The new VAR will have lexical scope and thus may
- be shadowed by LET bindings without affecting its dynamic (global) value."
-  (let* ((s0 (symbol-name '#:*storage-for-deflex-var-))
-	 (s1 (symbol-name var))
-	 (s2 (symbol-name '#:*))
-	 (s3 (symbol-package var))
-	 (backing-var (intern (concatenate 'string s0 s1 s2) s3)))
-    ;; Note: The DEFINE-SYMBOL-MACRO must be the last thing we do so
-    ;; that the value of the form is the symbol VAR.
-    (if docp
-      `(progn
-	 (defparameter ,backing-var ,val ,doc)
-	 (setf (documentation ',var 'variable) ,doc)
-	 (define-symbol-macro ,var ,backing-var))
-      `(progn
-	 (defparameter ,backing-var ,val)
-	 (define-symbol-macro ,var ,backing-var))))
+(defmacro defconst (name value &optional (documentation nil docp))
+  (let ((global (intern (format nil "%%~A" (symbol-name name)))))
+    `(progn
+       (defvar ,global ,value ,@(and docp `(,documentation)))
+       (define-symbol-macro ,name (load-time-value ,global t)))))

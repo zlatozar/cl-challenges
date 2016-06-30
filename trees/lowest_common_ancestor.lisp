@@ -19,7 +19,7 @@
 
 ;;; TEST
 
-;; Format is ugly but more like a tree
+;; Format is ugly but looks more like a tree
 (defparameter *bin-tree* '(0
                            (1
                             (2) (3))
